@@ -68,10 +68,23 @@ head(teacher_evals_clean)
 
 ```
 
--   Example removing specified columns
+-   Example removing specified columns: **Lab 3 Question 5 - Revised**
 
 ```{r}
 #| label: wd-2-ex-2
+
+#modified from lab
+
+teacher_evals_clean <- teacher_evals |> 
+  rename(sex=gender) |>
+  filter(no_participants >= 10) |>
+  mutate(teacher_id = as.character(teacher_id),
+         course_id = as.character(course_id)) |> 
+  select(course_id, teacher_id, 
+         question_no, no_participants, resp_share, 
+         SET_score_avg, percent_failed_cur, 
+         academic_degree, seniority, sex)
+head(teacher_evals_clean)
 
 ```
 
@@ -102,18 +115,24 @@ filter(study_year == 2018)
 
 ```
 
--   Character Example 1 (any context)
+-   Character Example 1 (any context): **Lab 3 Question 12**
 
 ```{r}
 #| label: wd-3-character
 
+filter(academic_degree %in% c("dr","prof"))
+
 ```
 
--   Character Example 2 (example must use functions from **stringr**)
+-   Character Example 2 (example must use functions from **stringr**): **Lab 5 Identify Suspects**
 
 ```{r}
 #| label: wd-3-string
 
+  filter(membership_status == "gold",
+         check_in_date == "20180109",
+         str_detect(membership_id,
+                    pattern = "^48Z"))
 ```
 
 -   Date (example must use functions from **lubridate**)
@@ -129,6 +148,8 @@ filter(study_year == 2018)
 
 ```{r}
 #| label: wd-4-numeric-ex-1
+
+
 
 ```
 
@@ -158,6 +179,16 @@ filter(study_year == 2018)
 ```{r}
 #| label: wd-4-string
 
+teacher_evals_clean <- teacher_evals |> 
+  rename(sex=gender) |>
+  filter(no_participants >= 10) |>
+  mutate(teacher_id = as.character(teacher_id),
+         course_id = as.character(course_id)) |> 
+  select(course_id, teacher_id, 
+         question_no, no_participants, resp_share, 
+         SET_score_avg, percent_failed_cur, 
+         academic_degree, seniority, sex)
+head(teacher_evals_clean)
 ```
 
 -   Date (example must use functions from **lubridate**)
