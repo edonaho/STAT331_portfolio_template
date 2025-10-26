@@ -60,10 +60,9 @@ teacher_evals_clean <- teacher_evals |>
   filter(no_participants >= 10) |>
   mutate(teacher_id = as.character(teacher_id),
          course_id = as.character(course_id)) |> 
-  select(course_id, teacher_id, 
-         question_no, no_participants, resp_share, 
-         SET_score_avg, percent_failed_cur, 
-         academic_degree, seniority, sex)
+  select(-course_id, -teacher_id, 
+         -question_no)
+
 head(teacher_evals_clean)
 
 ```
@@ -88,11 +87,26 @@ head(teacher_evals_clean)
 
 ```
 
--   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`)
+-   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`) **Lab 4 Question 7**
 
 ```{r}
 #| label: wd-2-ex-3
 
+recreate_plot <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         starts_with("mc_"), # find columns that have names that start with mc_
+         census_region) |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+             names_to = "age",
+             values_to = "price") |> 
+  mutate(age = case_when(age == "mc_infant" ~ "Infant",
+                         age == "mc_toddler" ~ "Toddler",
+                         age == "mc_preschool" ~ "Preschool",
+                         TRUE ~ age),
+    census_region = fct_reorder2(.f = census_region, .x = study_year, 
+                 .y = price, 
+                .desc = TRUE))
 ```
 
 **WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
@@ -135,11 +149,21 @@ filter(academic_degree %in% c("dr","prof"))
                     pattern = "^48Z"))
 ```
 
--   Date (example must use functions from **lubridate**)
+-   Date (example must use functions from **lubridate**): **Modified from Lab 5 Identify Suspects**
 
 ```{r}
 #| label: wd-3-date
 
+mydata <- tibble(
+  date = c(20180110, 20170210, 20180109, 20170211, 20101011, 20101010),
+  membership = c("gold", "silver","gold", "silver", "gold", "gold"))
+
+mydata |> 
+  mutate(
+    date = ymd(date)) |> 
+  filter(
+    membership == "gold",
+    day(date) == 10)
 ```
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
