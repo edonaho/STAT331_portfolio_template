@@ -381,7 +381,7 @@ median_inc_change <- ca_childcare |>
   arrange(desc(median_2018))
 ```
 
-## Reproducibility
+## Reproducibility - will fill in with more assignments because already submitted revisions
 
 **R-1: I can create professional looking, reproducible analyses using RStudio projects, Quarto documents, and the here package.**
 
@@ -393,23 +393,53 @@ The following assignments satisfy the above criteria:
 -   Example 4
 -   Example 5
 
-**R-2: I can write well documented and tidy code.**
+**R-2: I can write well documented and tidy code. -** do i need to inlcude notes in these?
 
--   Example of **ggplot2** plotting
+-   Example of **ggplot2** plotting **Challenge 3 Question 2**
 
 ```{r}
 #| label: r-2-1
 
+ggplot(data = teacher_evals_compare, 
+      mapping = aes(x = sen_level, fill = SET_level)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = label_percent()) +
+  scale_fill_manual(
+    values = c(
+       "excellent" = "#B297D0",
+       "standard" = "#B49664")) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(title= "Evalutation of Teachers' Use of Activities",
+      x = "Years of Experience",
+      y = NULL,
+      fill = "Evaluation Rating")
+
 ```
 
--   Example of **dplyr** pipeline
+-   Example of **dplyr** pipeline **Lab 4 Question 5**
 
 ```{r}
 #| label: r-2-2
 
+median_inc_change <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         census_region, 
+         mhi_2018) |> 
+  filter(study_year %in% c(2008,2018)) |> 
+  pivot_wider (names_from = study_year,
+               values_from = mhi_2018) |> 
+  group_by(census_region) |> 
+  summarize(
+    median_2018 = median(`2018`),
+    median_2008 = median(`2008`),
+    .groups = "drop" ) |> 
+  arrange(desc(median_2018))
+
 ```
 
--   Example of function formatting
+-   Example of function formatting - what is this?
 
 ```{r}
 #| label: r-2-3
@@ -436,25 +466,72 @@ The following assignments satisfy the above criteria:
 
 **DVS-1: I can create visualizations for a *variety* of variable types (e.g., numeric, character, factor, date)**
 
--   At least two numeric variables
+-   At least two numeric variables **Lab 2 Question 16**
 
 ```{r}
 #| label: dvs-1-num
 
+ggplot(data = surveys, 
+    mapping = aes(x = species, y = weight)) +
+    geom_jitter(width = 0.2, 
+                    height = 0, 
+                    alpha = 0.2, 
+                    color = "darkseagreen") +
+    geom_boxplot(color = "darkgreen", 
+                   outliers = FALSE, 
+                   alpha = 0) +
+    coord_flip() +
+    theme_bw() +
+        labs(
+          title = "Comparing Weight and Species",
+           x = "Species",
+          y = "Weight (g)"
+        )
 ```
 
--   At least one numeric variable and one categorical variable
+-   At least one numeric variable and one categorical variable **Lab 3 Question 2**
 
 ```{r}
 #| label: dvs-2-num-cat
 
+teacher_evals_compare <- teacher_evals |> 
+  filter(question_no == 903) |> 
+  mutate(
+    SET_level = if_else(SET_score_avg >= 4,"excellent", "standard"),
+    sen_level = case_when(
+                    seniority <= 4 ~ "junior", 
+                    seniority <= 8 ~ "senior",
+                    seniority > 8 ~ "very senior")) |> 
+  select(course_id, SET_level, sen_level)
+
+head(teacher_evals_compare)
 ```
 
--   At least two categorical variables
+-   At least two categorical variables **Lab 4 Question 7**
 
 ```{r}
 #| label: dvs-2-cat
 
+ggplot(data = recreate_plot, 
+        mapping = aes(x = study_year, y = price, color = census_region)) +
+    geom_point(size = 0.75) +
+    geom_smooth(linewidth = 0.75) +
+    facet_wrap(~factor(age, c("Infant", "Toddler", "Preschool"))) +
+    scale_y_continuous(
+                    labels = scales::dollar_format(
+                      prefix = "$", big.mark = ",")) +
+    scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2),  # only show every 2 years
+             limits = c(2008, 2018)) +
+    theme_bw(base_size = 10) +
+    theme(aspect.ratio = 1.25, 
+            axis.text.x = element_text(angle = 30)) +
+    labs(
+         title = "Weekly Median Price for Center-Based Childcare ($)",
+         x = "Study Year",
+         y = NULL,
+        color = "California Region") +
+    scale_color_manual(values = mycolors)
 ```
 
 -   Dates (time series plot)
@@ -466,51 +543,172 @@ The following assignments satisfy the above criteria:
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
 
--   I can modify my plot theme to be more readable
+-   I can modify my plot theme to be more readable **Lab 2 Question 4**
 
 ```{r}
 #| label: dvs-2-ex-1
 
+ggplot(data = surveys, 
+        mapping = aes(x = weight, y = hindfoot_length)) +
+    geom_point(alpha = 0.2) +
+    theme_bw() +
+    facet_wrap(~species, scales = "free") +
+    labs(
+        title = "Comparing Weight and Hindfoot Length Between Species",
+        x = "Weight (g)",
+        y = NULL,
+          subtitle = "Hindfoot Length (mm)")
+  
 ```
 
--   I can modify my colors to be accessible to anyone's eyes
+-   I can modify my colors to be accessible to anyone's eyes **Lab 4 Question 7**
 
 ```{r}
 #| label: dvs-2-ex-2
 
+mycolors<- colorRampPalette(brewer.pal(7, "Accent"))(10) #take color palette that has only 7 colors into 10
+  
+ggplot(data = recreate_plot, 
+        mapping = aes(x = study_year, y = price, color = census_region)) +
+        geom_point(size = 0.75) +
+        geom_smooth(linewidth = 0.75) +
+        facet_wrap(~factor(age, c("Infant", "Toddler", "Preschool"))) +
+         scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
+         scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2),  # only show every 2 years
+             limits = c(2008, 2018)) +
+        theme_bw(base_size = 10) +
+        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
+        labs(
+          title = "Weekly Median Price for Center-Based Childcare ($)",
+           x = "Study Year",
+           y = NULL,
+           color = "California Region") +
+  scale_color_manual(values = mycolors)
 ```
 
--   I can modify my plot titles to clearly communicate the data context
+-   I can modify my plot titles to clearly communicate the data context **Challenge 4 Plot of the Data**
 
 ```{r}
 #| label: dvs-2-ex-3
 
+ggplot(data = my_research_long, 
+        mapping = aes(x = study_year, y = price, color = care_type)) +
+        geom_point() +
+        geom_smooth(linewidth = 0.75) +
+        facet_wrap(~census_region, scales = "free", ncol = 3) +
+        scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
+        scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
+        theme_bw(base_size = 12) +
+        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
+        labs(
+          title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
+           x = "Study Year",
+           y = NULL,
+           color = "Type of Care")
 ```
 
--   I can modify the text in my plot to be more readable
+-   I can modify the text in my plot to be more readable **Lab 2 Question 8**
 
 ```{r}
 #| label: dvs-2-ex-4
 
+ggplot(data = surveys, 
+        mapping = aes(x = species, y = weight)) +
+        geom_jitter(width = 0.2, 
+                    height = 0, 
+                    alpha = 0.2, 
+                    color = "darkseagreen")+
+   geom_boxplot(color = "darkgreen", 
+                outliers = FALSE, 
+                alpha = 0) +
+   theme_bw() +
+   theme(axis.text.x = element_text(angle = -45)) + #titlting x axis labels for readability
+        labs(
+          title = "Comparing Weight and Species",
+           x = "Species",
+          y = "Weight (g)"
+        )
 ```
 
--   I can reorder my legend to align with the colors in my plot
+-   I can reorder my legend to align with the colors in my plot **Lab 4 Question 7**
 
 ```{r}
 #| label: dvs-2-ex-5
 
+recreate_plot <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool, 
+         census_region) |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+             names_to = "age",
+             values_to = "price") |> 
+  mutate(age = case_when(age == "mc_infant" ~ "Infant",
+                         age == "mc_toddler" ~ "Toddler",
+                         age == "mc_preschool" ~ "Preschool",
+                         TRUE ~ age),
+    census_region = fct_reorder2(.f = census_region, .x = study_year, #using factor reorder for legend order
+                 .y = price, 
+                .desc = TRUE))
+library(RColorBrewer)
+
+mycolors<- colorRampPalette(brewer.pal(7, "Accent"))(10) #take color palette that has only 7 colors into 10
+  
+ggplot(data = recreate_plot, 
+        mapping = aes(x = study_year, y = price, color = census_region)) + #this will be ordered now
+        geom_point(size = 0.75) +
+        geom_smooth(linewidth = 0.75) +
+        facet_wrap(~factor(age, c("Infant", "Toddler", "Preschool"))) +
+         scale_y_continuous(labels = scales::dollar_format(
+                                prefix = "$", big.mark = ",")) +
+         scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2),  # only show every 2 years
+             limits = c(2008, 2018)) +
+        theme_bw(base_size = 10) +
+        theme(aspect.ratio = 1.25, 
+              axis.text.x = element_text(angle = 30)) +
+        labs(
+          title = "Weekly Median Price for Center-Based Childcare ($)",
+           x = "Study Year",
+           y = NULL,
+           color = "California Region") +
+  scale_color_manual(values = mycolors)
 ```
 
 **DVS-3: I show creativity in my visualizations**
 
--   I can use non-standard colors (Example 1)
+-   I can use non-standard colors (Example 1) **Challenge 2 Spicy**
 
 ```{r}
 #| label: dvs-3-1-ex-1
 
+ggplot(data = surveys, 
+        mapping = aes(x = species, y = weight)) +
+        geom_jitter(width = 0.2, 
+                    height = 0, 
+                    alpha = 0.2, 
+                    color = "darkseagreen")+
+       geom_boxplot(alpha = 0, 
+                  color = "darkgreen",
+                  outliers = FALSE,
+                  median.color= "black",
+                  median.linewidth = 0.75, 
+                  box.linewidth= 0.25) +
+        theme_bw(base_size = 14, base_family = "times new roman") +
+   theme(axis.text.x = element_text(angle = 30),
+         panel.border = element_rect(colour = "darkgreen", linewidth=2)) +
+        labs(
+          title = "Comparing Median Weight between Rodent Species",
+           x = "Species",
+          y = "Weight" 
+        )
 ```
 
--   I can use non-standard colors (Example 2)
+-   I can use non-standard colors (Example 2) - wait on this cause im strugglin
 
 ```{r}
 #| label: dvs-3-1-ex-2
@@ -533,14 +731,27 @@ The following assignments satisfy the above criteria:
 
 **DVS-4: I can calculate numerical summaries of variables.**
 
--   Example using `summarize()`
+-   Example using `summarize()` **Challenge 4 Summary Table**
 
 ```{r}
 #| label: dvs-4-summarize
 
+region_summary <- my_research |> 
+  group_by(census_region) |> 
+  summarize(
+    avg_mc_toddler   = mean(mc_toddler),
+    avg_mfcc_toddler = mean(mfcc_toddler),
+    avg_mc_mfcc_gap  = mean(mc_toddler - mfcc_toddler),
+    .groups = "drop") |> 
+    arrange(desc(avg_mc_mfcc_gap)) |> 
+  rename( "Average Center-based" =  avg_mc_toddler, 
+           "Average In-Home" = avg_mfcc_toddler,
+          "Difference (CB-IH)" = avg_mc_mfcc_gap,
+          "Census Region" = census_region)
+
 ```
 
--   Example using `across()`
+-   Example using `across()` - look for revision opportunity
 
 ```{r}
 #| label: dvs-4-across
@@ -549,11 +760,19 @@ The following assignments satisfy the above criteria:
 
 **DVS-5: I can find summaries of variables across multiple groups.**
 
--   Example 1
+-   Example 1 **Lab 3 Question 12**
 
 ```{r}
 #| label: dvs-5-1
 
+teacher_evals_clean |> 
+  filter(academic_degree %in% c("dr","prof"))|>
+  group_by(teacher_id, sex, seniority) |>
+  summarize(
+    avg_percent_resp = mean(resp_share, na.rm = TRUE),
+    .groups = "drop")|> 
+      filter(avg_percent_resp %in% c(min(avg_percent_resp),max(avg_percent_resp))) |> 
+  arrange(desc(avg_percent_resp))
 ```
 
 -   Example 2
@@ -569,7 +788,18 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-6-ex-1
-
+region_summary <- my_research |> 
+  group_by(census_region) |> 
+  summarize(
+    avg_mc_toddler   = mean(mc_toddler),
+    avg_mfcc_toddler = mean(mfcc_toddler),
+    avg_mc_mfcc_gap  = mean(mc_toddler - mfcc_toddler),
+    .groups = "drop") |> 
+  arrange(desc(avg_mc_mfcc_gap)) |> 
+  rename( "Average Center-based" =  avg_mc_toddler, 
+           "Average In-Home" = avg_mfcc_toddler,
+          "Difference (CB-IH)" = avg_mc_mfcc_gap,
+          "Census Region" = census_region)
 ```
 
 -   I can modify the text in my table to be more readable (e.g., bold face for column headers)
@@ -606,14 +836,23 @@ The following assignments satisfy the above criteria:
 
 **PE-1: I can write concise code which does not repeat itself.**
 
--   using a single function call with multiple inputs (rather than multiple function calls)
+-   using a single function call with multiple inputs (rather than multiple function calls) **Lab 5 Identify Murderer**
 
 ```{r}
 #| label: pe-1-one-call
 
+detective |> 
+  filter(hair_color == "red", 
+         gender == "female", 
+         car_make == "Tesla", 
+         car_model == "Model S", 
+         between(height, 65, 67), 
+         event_name == "SQL Symphony Concert") |> 
+  summarize(name)
+
 ```
 
--   using `across()`
+-   using `across()` - come back for this one
 
 ```{r}
 #| label: pe-1-across
@@ -680,13 +919,40 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: pe-4-1
 
+ggplot(data = my_research_long, 
+        mapping = aes(x = study_year, y = price, color = care_type)) +
+        geom_point() +
+        geom_smooth(linewidth = 0.75) +
+        facet_wrap(~census_region, scales = "free", ncol = 3) +
+        scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) + #dollar format is a modern tool
+        scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
+        theme_bw(base_size = 12) +
+        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
+        labs(
+          title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
+           x = "Study Year",
+           y = NULL,
+           color = "Type of Care")
+
 ```
 
--   I can connect a data wrangling pipeline into a `ggplot()`
+-   I can connect a data wrangling pipeline into a `ggplot()` **Lab 4 Question 8**
 
 ```{r}
 #| label: pe-4-2
 
+
+ca_childcare |> ggplot(mapping = aes(x = mhi_2018, y = mc_infant)) +
+        geom_point() +
+        geom_smooth(method = lm)+
+    scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
+    scale_x_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
+    theme_bw() +
+    labs(
+      title = "Relationship Between CA Income and Price of Center-Based Childcare for Infants",
+      x = "Median Household Income (2018 Dollars)",
+      y = "Median Price of Childcare" )
 ```
 
 ## Data Simulation & Statisical Models
@@ -709,11 +975,12 @@ The following assignments satisfy the above criteria:
 
 **DSSM-2: I can conduct common statistical analyses in R.**
 
--   Example 1
+-   Example 1 **Lab 2 Question 17**
 
 ```{r}
 #| label: dsm-2-1
 
+aov(weight ~ species, data = surveys)
 ```
 
 -   Example 2
