@@ -168,34 +168,81 @@ mydata |>
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   Numeric Example 1
+-   Numeric Example 1 **Lab 5 Identify Suspects**
 
 ```{r}
 #| label: wd-4-numeric-ex-1
 
-
-
+detective |> 
+  filter(membership_status == "gold",
+         month(check_in_date) == 1,
+         day(check_in_date) == 9,
+         str_detect(membership_id,
+                    pattern = "^48Z"))
 ```
 
--   Numeric Example 2
+-   Numeric Example 2 **Challenge 3 Question 3**
 
 ```{r}
 #| label: wd-4-numeric-ex-2
 
+
+teacher_evals_compare <- teacher_evals |> 
+  filter(question_no == 903) |> 
+  mutate(
+    SET_level = if_else(SET_score_avg >= 4,"excellent", "standard"),
+    sen_level = case_when(
+                    seniority <= 4 ~ "junior", 
+                    seniority <= 8 ~ "senior",
+                    seniority > 8 ~ "very senior")) |> 
+  select(course_id, SET_level, sen_level)
+
+
 ```
 
--   Factor Example 1 (renaming levels)
+-   Factor Example 1 (renaming levels) **Lab 4 Question 4**
 
 ```{r}
 #| label: wd-4-factor-ex-1
 
+ca_childcare <- ca_childcare |> 
+  mutate(county_name = str_remove(county_name, " County"),
+      census_region = fct_collapse(.f = county_name,
+               "Superior" = superior_counties,
+               "North Coast" = north_coast_counties,
+               "San Francisco" = san_fran_counties,
+               "North San Joaquin" = n_san_joaquin_counties,
+               "Central Coast" = central_coast_counties,
+               "South San Joaquin" = s_san_joaquin_counties,
+               "Inland" = inland_counties,
+               "Los Angeles" = la_county,
+               "Orange County" = orange_county,
+               "San Diego" = san_diego_imperial_counties ))
+
 ```
 
--   Factor Example 2 (reordering levels)
+-   Factor Example 2 (reordering levels) **Lab 4 Question 7**
 
 ```{r}
 #| label: wd-4-factor-ex-2
 
+recreate_plot <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool, 
+         census_region) |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+             names_to = "age",
+             values_to = "price") |> 
+  mutate(age = case_when(age == "mc_infant" ~ "Infant",
+                         age == "mc_toddler" ~ "Toddler",
+                         age == "mc_preschool" ~ "Preschool",
+                         TRUE ~ age),
+    census_region = fct_reorder2(.f = census_region, .x = study_year, 
+                 .y = price, 
+                .desc = TRUE))
 ```
 
 -   Character (example must use functions from **stringr**)
@@ -203,16 +250,6 @@ mydata |>
 ```{r}
 #| label: wd-4-string
 
-teacher_evals_clean <- teacher_evals |> 
-  rename(sex=gender) |>
-  filter(no_participants >= 10) |>
-  mutate(teacher_id = as.character(teacher_id),
-         course_id = as.character(course_id)) |> 
-  select(course_id, teacher_id, 
-         question_no, no_participants, resp_share, 
-         SET_score_avg, percent_failed_cur, 
-         academic_degree, seniority, sex)
-head(teacher_evals_clean)
 ```
 
 -   Date (example must use functions from **lubridate**)
@@ -220,35 +257,56 @@ head(teacher_evals_clean)
 ```{r}
 #| label: wd-4-date
 
+detective <- detective |> 
+mutate(
+  check_in_date = ymd(check_in_date)
+)
+
 ```
 
 **WD-5: I can use mutating joins to combine multiple dataframes.**
 
--   `left_join()` Example 1
+-   `left_join()` Example 1 **Lab 4 Question 3**
 
 ```{r}
 #| label: wd-5-left-ex-1
 
+ca_childcare <- left_join(x = ca_childcare,
+           y = tax_rev,
+          by = join_by(study_year == year, county_name == entity_name))
+
 ```
 
--   `right_join()` Example 1
+-   `right_join()` Example 1 **Lab 4 Question 3 Revised**
 
 ```{r}
 #| label: wd-5-right
 
+ca_childcare <- right_join(x = tax_rev,
+           y = ca_childcare,
+          by = join_by(study_year == year, county_name == entity_name))
+
 ```
 
--   `left_join()` **or** `right_join()` Example 2
+-   `left_join()` **or** `right_join()` **Lab 5 Data Join Revised**
 
 ```{r}
 #| label: wd-5-left-right-ex-2
 
+detective <- get_fit_now_check_in |> 
+    left_join(get_fit_now_member,
+        join_by(membership_id == id))
+
 ```
 
--   `inner_join()` Example 1
+-   `inner_join()` Example 1 **Lab 5 Data Join Revised**
 
 ```{r}
 #| label: wd-5-inner-ex-1
+
+detective <- get_fit_now_check_in |> 
+    inner_join(person,
+              join_by(person_id == id, name))
 
 ```
 
@@ -277,18 +335,50 @@ head(teacher_evals_clean)
 
 **WD-7: I can pivot dataframes from long to wide and visa versa**
 
--   `pivot_longer()`
+-   `pivot_longer()` **Lab 4 Question 7**
 
 ```{r}
 #| label: wd-7-long
 
+recreate_plot <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool, 
+         census_region) |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+             names_to = "age",
+             values_to = "price") |> 
+  mutate(age = case_when(age == "mc_infant" ~ "Infant",
+                         age == "mc_toddler" ~ "Toddler",
+                         age == "mc_preschool" ~ "Preschool",
+                         TRUE ~ age),
+    census_region = fct_reorder2(.f = census_region, .x = study_year, 
+                 .y = price, 
+                .desc = TRUE))
+
 ```
 
--   `pivot_wider()`
+-   `pivot_wider()` **Lab 4 Question 5**
 
 ```{r}
 #| label: wd-7-wide
 
+median_inc_change <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         census_region, 
+         mhi_2018) |> 
+  filter(study_year %in% c(2008,2018)) |> 
+  pivot_wider (names_from = study_year,
+               values_from = mhi_2018) |> 
+  group_by(census_region) |> 
+  summarize(
+    median_2018 = median(`2018`),
+    median_2008 = median(`2008`),
+    .groups = "drop" ) |> 
+  arrange(desc(median_2018))
 ```
 
 ## Reproducibility
@@ -297,7 +387,7 @@ head(teacher_evals_clean)
 
 The following assignments satisfy the above criteria:
 
--   Example 1
+-   Lab 5
 -   Example 2
 -   Example 3
 -   Example 4
