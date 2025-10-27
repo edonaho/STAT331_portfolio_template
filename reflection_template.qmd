@@ -10,10 +10,12 @@ layout: margin-left
 editor: visual
 execute: 
   eval: false
+  error: true
   echo: true
+  warnings: false
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_\_.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_B+\_.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -21,10 +23,12 @@ execute:
 
 **WD-1: I can import data from a *variety* of formats (e.g., csv, xlsx, txt, etc.).**
 
--   `csv` Example 1: Lab 3 Question 2
+-   `csv` Example 1: **Lab 3 Question 2**
 
 ```{r}
 #| label: wd-1-csv-1
+
+#using the here::here function to easily look for files already put into the working directory
 
 teacher_evals <- read_csv(here::here("Week 3", "teacher_evals.csv"))
 
@@ -39,13 +43,13 @@ surveys <- read_csv(here::here("Week 2", "surveys.csv"))
 
 ```
 
--   `xlsx: Check-In 2.2`
+-   `xlsx:`**Check-In 2.3: Loading Data**
 
 ```{r}
 #| label: wd-1-xlsx
 
 
-angev <- read_excel(here::here("ang_ev_1980.xlsx"))
+ages <- read_excel(here::here("ages.xlsx"))
 ```
 
 **WD-2: I can select necessary columns from a dataset.**
@@ -60,31 +64,27 @@ teacher_evals_clean <- teacher_evals |>
   filter(no_participants >= 10) |>
   mutate(teacher_id = as.character(teacher_id),
          course_id = as.character(course_id)) |> 
-  select(-course_id, -teacher_id, 
-         -question_no)
-
-head(teacher_evals_clean)
+  select(course_id, teacher_id, 
+         question_no, no_participants, resp_share, #<- selecting solely these columns
+         SET_score_avg, percent_failed_cur, 
+         academic_degree, seniority, sex)
 
 ```
 
--   Example removing specified columns: **Lab 3 Question 5 - Revised**
+-   Example removing specified columns: **Lab 3 Question 5 - Revised/Edited**
 
 ```{r}
 #| label: wd-2-ex-2
 
-#modified from lab
+#modified from lab 3 to remove columns instead of solely select
 
 teacher_evals_clean <- teacher_evals |> 
   rename(sex=gender) |>
   filter(no_participants >= 10) |>
   mutate(teacher_id = as.character(teacher_id),
          course_id = as.character(course_id)) |> 
-  select(course_id, teacher_id, 
-         question_no, no_participants, resp_share, 
-         SET_score_avg, percent_failed_cur, 
-         academic_degree, seniority, sex)
-head(teacher_evals_clean)
-
+  select(-course_id, -teacher_id, #selecting all columns BUT these 3 (removing the 3)
+         -question_no)
 ```
 
 -   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`) **Lab 4 Question 7**
@@ -111,30 +111,63 @@ recreate_plot <- ca_childcare |>
 
 **WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   Numeric Example 1: **Lab 4 Question 5**
+-   Numeric Example 1: **Lab 4 Question 5 - Revised**
 
 ```{r}
 #| label: wd-3-numeric-ex-1
 
-filter(study_year %in% c(2008,2018))
+#Feedback: Amazing column names!!!!
+#I would recommend using the %in% operator instead of the or!
+
+median_inc_change <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         census_region, 
+         mhi_2018) |> 
+  filter(study_year %in% c(2008,2018)) |> 
+  pivot_wider (names_from = study_year,
+               values_from = mhi_2018) |> 
+  group_by(census_region) |> 
+  summarize(
+    median_2018 = median(`2018`),
+    median_2008 = median(`2008`),
+    .groups = "drop" ) |> 
+  arrange(desc(median_2018))
 
 ```
 
 -   Numeric Example 2: **Lab 4 Question 6**
 
 ```{r}
-#| label: wd-3-numeric-ex-1
+#| label: wd-3-numeric-ex-2
 
-filter(study_year == 2018)
+ca_childcare |> 
+  filter(study_year == 2018) |> 
+  select (county_name, census_region, mc_infant, study_year) |> 
+  group_by(census_region) |> 
+  summarize(
+    region_median_mc_infant = median(mc_infant),
+    .groups = "drop") |> 
+  slice_min(region_median_mc_infant) #add this to get the exact answer
 
 ```
 
--   Character Example 1 (any context): **Lab 3 Question 12**
+-   Character Example 1 (any context): **Lab 3 Question 12 - Revised**
 
 ```{r}
 #| label: wd-3-character
 
-filter(academic_degree %in% c("dr","prof"))
+#Feedback: I would recommend using the %in% operator instead of the or!
+#Look at your output! You have the same row repeated 6 times! Is there a way to get only one row with this information?
+
+teacher_evals_clean |> 
+  filter(academic_degree %in% c("dr","prof"))|>
+  group_by(teacher_id, sex, seniority) |>
+  summarize(
+    avg_percent_resp = mean(resp_share, na.rm = TRUE),
+    .groups = "drop")|> 
+      filter(avg_percent_resp %in% c(min(avg_percent_resp),max(avg_percent_resp))) |> 
+  arrange(desc(avg_percent_resp))
 
 ```
 
@@ -143,42 +176,38 @@ filter(academic_degree %in% c("dr","prof"))
 ```{r}
 #| label: wd-3-string
 
-  filter(membership_status == "gold",
-         check_in_date == "20180109",
-         str_detect(membership_id,
-                    pattern = "^48Z"))
-```
-
--   Date (example must use functions from **lubridate**): **Modified from Lab 5 Identify Suspects**
-
-```{r}
-#| label: wd-3-date
-
-mydata <- tibble(
-  date = c(20180110, 20170210, 20180109, 20170211, 20101011, 20101010),
-  membership = c("gold", "silver","gold", "silver", "gold", "gold"))
-
-mydata |> 
-  mutate(
-    date = ymd(date)) |> 
-  filter(
-    membership == "gold",
-    day(date) == 10)
-```
-
-**WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
-
--   Numeric Example 1 **Lab 5 Identify Suspects**
-
-```{r}
-#| label: wd-4-numeric-ex-1
-
 detective |> 
   filter(membership_status == "gold",
          month(check_in_date) == 1,
          day(check_in_date) == 9,
          str_detect(membership_id,
                     pattern = "^48Z"))
+```
+
+-   Date (example must use functions from **lubridate**): **Modified from Lab 5 Identify Suspects - Revised**
+
+```{r}
+#| label: wd-3-date
+
+detective <- detective |> 
+mutate(
+  check_in_date = ymd(check_in_date)) |> # make check_in_date a date data type so we can use date functions on it!
+  filter(membership_status == "gold",
+         month(check_in_date) == 1,
+         day(check_in_date) == 9,
+         str_detect(membership_id,
+                    pattern = "^48Z"))
+```
+
+**WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
+
+-   Numeric Example 1 **Lab 5 Identify Suspects - Modified**
+
+```{r}
+#| label: wd-4-numeric-ex-1
+
+
+
 ```
 
 -   Numeric Example 2 **Challenge 3 Question 3**
@@ -226,6 +255,8 @@ ca_childcare <- ca_childcare |>
 ```{r}
 #| label: wd-4-factor-ex-2
 
+#Feedback: Nice work pivoting and modifying the age variable! Nice dollar signs!!! Can you reorder the colors in the legend so they appear in the same order as the lines in the plot? I am specifically looking for a tool that does the reordering for you since doing the reordering by hand is not a robust programming practice!
+
 recreate_plot <- ca_childcare |> 
   select(county_name, 
          study_year, 
@@ -245,14 +276,20 @@ recreate_plot <- ca_childcare |>
                 .desc = TRUE))
 ```
 
--   Character (example must use functions from **stringr**)
+-   Character (example must use functions from **stringr**) **Lab 5 Identify Suspects - Modified**
 
 ```{r}
 #| label: wd-4-string
 
+detective |> 
+  mutate(
+    potential_suspect = if_else(str_detect(membership_id,
+                    pattern = "^48Z"),1,0)
+  )
+
 ```
 
--   Date (example must use functions from **lubridate**)
+-   Date (example must use functions from **lubridate**) **Lab 5 Identify Suspects**
 
 ```{r}
 #| label: wd-4-date
@@ -282,6 +319,8 @@ ca_childcare <- left_join(x = ca_childcare,
 ```{r}
 #| label: wd-5-right
 
+#modified to be a right join that has the same function as a left join (switched the variables)
+
 ca_childcare <- right_join(x = tax_rev,
            y = ca_childcare,
           by = join_by(study_year == year, county_name == entity_name))
@@ -303,6 +342,8 @@ detective <- get_fit_now_check_in |>
 
 ```{r}
 #| label: wd-5-inner-ex-1
+
+#this was originally a left join but we want to keep only the values that match to find the suspect, inner join is better
 
 detective <- get_fit_now_check_in |> 
     inner_join(person,
@@ -489,22 +530,25 @@ ggplot(data = surveys,
         )
 ```
 
--   At least one numeric variable and one categorical variable **Lab 3 Question 2**
+-   At least one numeric variable and one categorical variable **Challenge 3 Question 2**
 
 ```{r}
 #| label: dvs-2-num-cat
 
-teacher_evals_compare <- teacher_evals |> 
-  filter(question_no == 903) |> 
-  mutate(
-    SET_level = if_else(SET_score_avg >= 4,"excellent", "standard"),
-    sen_level = case_when(
-                    seniority <= 4 ~ "junior", 
-                    seniority <= 8 ~ "senior",
-                    seniority > 8 ~ "very senior")) |> 
-  select(course_id, SET_level, sen_level)
-
-head(teacher_evals_compare)
+ggplot(data = teacher_evals_compare, 
+      mapping = aes(x = sen_level, fill = SET_level)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = label_percent()) +
+  scale_fill_manual(
+    values = c(
+       "excellent" = "#B297D0",
+       "standard" = "#B49664")) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(title= "Evalutation of Teachers' Use of Activities",
+      x = "Years of Experience",
+      y = NULL,
+      fill = "Evaluation Rating")
 ```
 
 -   At least two categorical variables **Lab 4 Question 7**
@@ -534,11 +578,26 @@ ggplot(data = recreate_plot,
     scale_color_manual(values = mycolors)
 ```
 
--   Dates (time series plot)
+-   Dates (time series plot) **Challenge 4 Plot Data**
 
 ```{r}
 #| label: dvs-2-date
 
+ggplot(data = my_research_long, 
+        mapping = aes(x = study_year, y = price, color = care_type)) +
+        geom_point() +
+        geom_smooth(linewidth = 0.75) +
+        facet_wrap(~census_region, scales = "free", ncol = 3) +
+        scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
+        scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
+        theme_bw(base_size = 12) +
+        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
+        labs(
+          title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
+           x = "Study Year",
+           y = NULL,
+           color = "Type of Care")
 ```
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
@@ -708,11 +767,30 @@ ggplot(data = surveys,
         )
 ```
 
--   I can use non-standard colors (Example 2) - wait on this cause im strugglin
+-   I can use non-standard colors (Example 2) - **Challenge 4 Plot of the Data** im strugglin
 
 ```{r}
 #| label: dvs-3-1-ex-2
 
+mycoolcolors =colorRampPalette(brewer.pal(7, "Accent"))(10)
+
+ggplot(data = my_research_long, 
+        mapping = aes(x = study_year, y = price, color = care_type)) +
+        geom_point() +
+        geom_smooth(linewidth = 0.75) +
+        facet_wrap(~census_region, scales = "free", ncol = 3) +
+        scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
+        scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
+        theme_bw(base_size = 12) +
+        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
+        labs(
+          title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
+           x = "Study Year",
+           y = NULL,
+           color = "Type of Care") +
+      scale_color_manual(values = mycoolcolors)
+        
 ```
 
 -   I can use annotations (e.g., `geom_text()`)
@@ -765,6 +843,8 @@ region_summary <- my_research |>
 ```{r}
 #| label: dvs-5-1
 
+#Feedback: I would recommend using the %in% operator instead of the or! Look at your output! You have the same row repeated 6 times! Is there a way to get only one row with this information?
+
 teacher_evals_clean |> 
   filter(academic_degree %in% c("dr","prof"))|>
   group_by(teacher_id, sex, seniority) |>
@@ -784,7 +864,7 @@ teacher_evals_clean |>
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
 
--   I can modify my column names to clearly communicate the data context
+-   I can modify my column names to clearly communicate the data context **Challenge 4 Summary Table**
 
 ```{r}
 #| label: dvs-6-ex-1
@@ -809,11 +889,25 @@ region_summary <- my_research |>
 
 ```
 
--   I can arrange my table to have an intuitive ordering
+-   I can arrange my table to have an intuitive ordering **Lab 4 Question 5**
 
 ```{r}
 #| label: dvs-6-ex-3
 
+median_inc_change <- ca_childcare |> 
+  select(county_name, 
+         study_year, 
+         census_region, 
+         mhi_2018) |> 
+  filter(study_year %in% c(2008,2018)) |> 
+  pivot_wider (names_from = study_year,
+               values_from = mhi_2018) |> 
+  group_by(census_region) |> 
+  summarize(
+    median_2018 = median(`2018`),
+    median_2008 = median(`2008`),
+    .groups = "drop" ) |> 
+  arrange(desc(median_2018)) #arrange in descending order to find highest median income
 ```
 
 **DVS-7: I show creativity in my tables.**
@@ -889,7 +983,7 @@ detective |>
 
 ```
 
-**PE-3:I can use iteration to reduce repetition in my code.**
+**PE-3: I can use iteration to reduce repetition in my code.**
 
 -   using `across()`
 
@@ -909,6 +1003,7 @@ detective |>
 
 ```{r}
 #| label: pe-3-map-2
+
 
 ```
 
@@ -934,10 +1029,9 @@ ggplot(data = my_research_long,
            x = "Study Year",
            y = NULL,
            color = "Type of Care")
-
 ```
 
--   I can connect a data wrangling pipeline into a `ggplot()` **Lab 4 Question 8**
+-   I can connect a data wrangling pipeline into a `ggplot()` **Lab 4 Question 8 Modified**
 
 ```{r}
 #| label: pe-4-2
@@ -1001,14 +1095,26 @@ aov(weight ~ species, data = surveys)
 
 <!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
 
+I think I have been challenged to think more about efficiency throughout this course. I've definitely learned that there is often an easier way to perform tasks when I am aware of the correct functions. This takes practice, but I think I am growing in recognizing shortcuts better. I revised my thinking my starting from square 1 on many problems, and envisioning the different ways to attack a problem. I often did this by writing down what I wanted to do on a piece of paper, and then translating that into functions that I know how to use. Its a bit frustrating when I see that there are shorter ways to do things, even when my way was successful, but that is part of learning code efficiency over time!
+
 <!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
 
 ## Extending My Thinking
 
 <!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
 
+I have extended my thinking by constantly searching through resources and Stack Overflow for more efficient solutions to problems. I like to be creative with my plots, so I tried my best to customize as much as possible using outside research and the tools at my disposal. I think I went above and beyond when it came to open-ended analysis because this is the kind of work that I want to be doing in the future. I am really trying to hone these skills so I can be prepared and make clear visualizations and reports.
+
 ## Peer Support & Collaboration
 
 <!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
 
+"First of all, I love the theme of your output! The white font is a little small and hard to read on the background but still super cute!"\
+
+"Make sure when you load in your data and libraries that you put {r, message=FALSE} in each code chunk to silence the messages. It took me forever to figure out where to put it, but it helps readability!"
+
+I think it is really important to lift people up for going the extra mile for creativity. I also makes me feel really good in a peer review when I know that I am simultaneously struggling, but there is advice to be given. It took me a long time to consistently have professional report skills, so I wanted to share that knowledge.
+
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
+
+It was really difficult to be the computer role during collaboration, because I want to blurt out the answer to the problem if I know it. However, I think that I learn best when challenged in the role of the coder, so I am trying my best to honor that experience. I think having mutual respect for the process with another partner has really garnered a positive space to grow. I think I am doing a better job at asking questions and helping others to find solutions on their own!
