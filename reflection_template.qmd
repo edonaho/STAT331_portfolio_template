@@ -15,7 +15,7 @@ execute:
   warnings: false
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_B+\_.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_A-\_.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -71,7 +71,7 @@ teacher_evals_clean <- teacher_evals |>
 
 ```
 
--   Example removing specified columns: **Lab 3 Question 5 - Revised/Edited**
+-   Example removing specified columns: **Lab 3 Question 5 - Modified**
 
 ```{r}
 #| label: wd-2-ex-2
@@ -171,17 +171,15 @@ teacher_evals_clean |>
 
 ```
 
--   Character Example 2 (example must use functions from **stringr**): **Lab 5 Identify Suspects**
+-   Character Example 2 (example must use functions from **stringr**): **Lab 5 Find Witnesses - Revised**
 
 ```{r}
 #| label: wd-3-string
 
-detective |> 
-  filter(membership_status == "gold",
-         month(check_in_date) == 1,
-         day(check_in_date) == 9,
-         str_detect(membership_id,
-                    pattern = "^48Z"))
+witness2 <- detective |> 
+  filter(
+    (str_detect(name,
+             pattern = "(A|a)nnabel") & address_street_name == "Franklin Ave"))
 ```
 
 -   Date (example must use functions from **lubridate**): **Modified from Lab 5 Identify Suspects - Revised**
@@ -201,7 +199,7 @@ mutate(
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   Numeric Example 1 **Lab 5 Identify Suspects - Modified**
+-   Numeric Example 1
 
 ```{r}
 #| label: wd-4-numeric-ex-1
@@ -250,7 +248,7 @@ ca_childcare <- ca_childcare |>
 
 ```
 
--   Factor Example 2 (reordering levels) **Lab 4 Question 7**
+-   Factor Example 2 (reordering levels) **Lab 4 Question 7 - Revised**
 
 ```{r}
 #| label: wd-4-factor-ex-2
@@ -283,8 +281,10 @@ recreate_plot <- ca_childcare |>
 
 detective |> 
   mutate(
-    potential_suspect = if_else(str_detect(membership_id,
-                    pattern = "^48Z"),1,0)
+    potential_suspect = if_else(
+                    str_detect(membership_id,
+                              pattern = "^48Z"),
+                    1, 0)
   )
 
 ```
@@ -327,7 +327,7 @@ ca_childcare <- right_join(x = tax_rev,
 
 ```
 
--   `left_join()` **or** `right_join()` **Lab 5 Data Join Revised**
+-   `left_join()` **or** `right_join()` **Lab 5 Data Join - Revised**
 
 ```{r}
 #| label: wd-5-left-right-ex-2
@@ -338,7 +338,7 @@ detective <- get_fit_now_check_in |>
 
 ```
 
--   `inner_join()` Example 1 **Lab 5 Data Join Revised**
+-   `inner_join()` Example 1 **Lab 5 Data Join - Revised**
 
 ```{r}
 #| label: wd-5-inner-ex-1
@@ -360,7 +360,7 @@ detective <- get_fit_now_check_in |>
 
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
 
--   `semi_join()`
+-   `semi_join()` - will add this in pending Lab 5 Revisions
 
 ```{r}
 #| label: wd-6-semi
@@ -696,6 +696,8 @@ ggplot(data = surveys,
 ```{r}
 #| label: dvs-2-ex-5
 
+#reorder legend using fct_reorder and then plotting with ggplot
+
 recreate_plot <- ca_childcare |> 
   select(county_name, 
          study_year, 
@@ -767,7 +769,7 @@ ggplot(data = surveys,
         )
 ```
 
--   I can use non-standard colors (Example 2) - **Challenge 4 Plot of the Data** im strugglin
+-   I can use non-standard colors (Example 2) - **Challenge 4 Plot of the Data**
 
 ```{r}
 #| label: dvs-3-1-ex-2
@@ -1109,12 +1111,14 @@ I have extended my thinking by constantly searching through resources and Stack 
 
 <!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
 
-"First of all, I love the theme of your output! The white font is a little small and hard to read on the background but still super cute!"\
+My feedback:
+
+"First of all, I love the theme of your output! The white font is a little small and hard to read on the background but still super cute!"
 
 "Make sure when you load in your data and libraries that you put {r, message=FALSE} in each code chunk to silence the messages. It took me forever to figure out where to put it, but it helps readability!"
 
-I think it is really important to lift people up for going the extra mile for creativity. I also makes me feel really good in a peer review when I know that I am simultaneously struggling, but there is advice to be given. It took me a long time to consistently have professional report skills, so I wanted to share that knowledge.
+I think it is really important to lift people up for going the extra mile for creativity. I also makes me feel really good in a peer review when I know that I am struggling through concepts alongside my fellow students. That makes the advice even more valuable. It took me a long time to consistently have professional report skills, so I wanted to share that knowledge.
 
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
 
-It was really difficult to be the computer role during collaboration, because I want to blurt out the answer to the problem if I know it. However, I think that I learn best when challenged in the role of the coder, so I am trying my best to honor that experience. I think having mutual respect for the process with another partner has really garnered a positive space to grow. I think I am doing a better job at asking questions and helping others to find solutions on their own!
+It was difficult to be the "computer" role during collaboration because I wanted to give the answer to the problem immediately when I identify it. However, I think that I learn best when challenged in the role of the coder, so I am trying my best to honor that experience for others. Having mutual respect for the process of trial and error with another partner has really garnered a positive space to grow. I think I am doing a better job at asking questions and helping others to find solutions on their own!
