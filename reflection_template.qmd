@@ -1424,7 +1424,7 @@ ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
 
 **DSSM-1: I can simulate data from a *variety* of probability models.**
 
--   Example 1 **Lab 10 Question 4**
+-   Example 1 **Lab 10 Question 1**
 
 ```{r}
 #| label: dsm-1-1
