@@ -15,7 +15,7 @@ execute:
   warnings: false
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_A-\_.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_A\_.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -452,11 +452,11 @@ median_inc_change <- ca_childcare |>
 
 The following assignments satisfy the above criteria:
 
--   Lab 5
--   Lab 7
--   Challenge 7
--   Lab 8
--   Lab 9
+-   Lab 5: Murder in SQL City
+-   Lab 7: Functions + Fish
+-   Challenge 7: Incorporating Multiple Inputs
+-   Lab 8: Data Frame Functions
+-   Lab 9: Searching for Efficiency & Making Great Tables
 
 **R-2: I can write well documented and tidy code.**
 
@@ -476,7 +476,8 @@ ggplot(data = teacher_evals_compare,
        "standard" = "#B49664")) +
   theme_bw() +
   theme(legend.position = "top") +
-  labs(title= "Evalutation of Teachers' Use of Activities",
+  labs(
+    title= "Evalutation of Teachers' Use of Activities",
       x = "Years of Experience",
       y = NULL,
       fill = "Evaluation Rating")
@@ -513,6 +514,7 @@ median_inc_change <- ca_childcare |>
 rescale_01 <- function(x){
   stopifnot(is.numeric(x))
   if (length(x) < 1) stop("Input vector must have length >= 1!")
+  
   rng <- range(x, na.rm = TRUE)
   x = (x - rng[1]) / (rng[2] - rng[1])
 }
@@ -760,12 +762,11 @@ ggplot(data = recreate_plot,
         geom_point(size = 0.75) +
         geom_smooth(linewidth = 0.75) +
         facet_wrap(~factor(age, c("Infant", "Toddler", "Preschool"))) +
-         scale_y_continuous(labels = label_currency(prefix = "$", big.mark = ",")) +
+         scale_y_continuous(labels = label_currency(prefix = "$")) +
          scale_x_continuous(
              breaks = seq(2008, 2018, by = 2),  # only show every 2 years
              limits = c(2008, 2018)) +
         theme_bw(base_size = 10) +
-        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
         labs(
           title = "Weekly Median Price for Center-Based Childcare ($)",
            x = "Study Year",
@@ -788,7 +789,6 @@ ggplot(data = my_research_long,
         scale_x_continuous(
              breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
         theme_bw(base_size = 12) +
-        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
         labs(
           title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
            x = "Study Year",
@@ -1255,17 +1255,15 @@ detective |>
 
 ```
 
--   using `across()` - **Lab 7 Question 1**
+-   using `across()` - **Lab 3 Question 8**
 
 ```{r}
 #| label: pe-1-across
 
-fishdata |> 
-  summarize(
-    across(
-      .cols = everything(),
-      .fns = ~ sum(is.na(.x))
-  ))
+teacher_evals_clean |>
+  filter(if_any(
+    .cols = everything(), 
+    .fns = ~ is.na(.x)))
 ```
 
 -   using functions from the `map()` family **Lab 9 Question 4**
@@ -1327,21 +1325,36 @@ rescale_01 <- function(x){
 
 **PE-3: I can use iteration to reduce repetition in my code.**
 
--   using `across()`
+-   using `across()` **Lab 7 Question 1**
 
 ```{r}
 #| label: pe-3-across
 
+
 ```
 
--   using a `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.)
+-   using a `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.) **Lab 9 Question 2**
 
 ```{r}
 #| label: pe-3-map-1
 
+surveys |> 
+  map_chr(.f = ~ class(.x)) |> 
+  enframe() |> 
+  mutate(
+    name = str_to_title(str_replace_all(name, 
+                pattern = "_", 
+                replacement = " ")),
+    value = str_to_title(value)) |> 
+
+  kable(
+  col.names = c("Variable", "Data Type"),
+  align = 'c',
+  caption = "Data Types in the Surveys Dataset") |> 
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
--   using a `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`)
+-   using a `map()` function with one input
 
 ```{r}
 #| label: pe-3-map-2
@@ -1351,86 +1364,140 @@ rescale_01 <- function(x){
 
 **PE-4: I can use modern tools when carrying out my analysis.**
 
--   I can use functions which are not superseded or deprecated
+-   I can use functions which are not superseded or deprecated **Lab 4 Question 7**
 
 ```{r}
 #| label: pe-4-1
 
-ggplot(data = my_research_long, 
-        mapping = aes(x = study_year, y = price, color = care_type)) +
-        geom_point() +
+ggplot(data = recreate_plot, 
+        mapping = aes(x = study_year, y = price, color = census_region)) +
+        geom_point(size = 0.75) +
         geom_smooth(linewidth = 0.75) +
-        facet_wrap(~census_region, scales = "free", ncol = 3) +
-        scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) + #dollar format is a modern tool
-        scale_x_continuous(
-             breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
-        theme_bw(base_size = 12) +
-        theme(aspect.ratio = 1.25, axis.text.x = element_text(angle = 30)) +
+        facet_wrap(~factor(age, c("Infant", "Toddler", "Preschool"))) +
+         scale_y_continuous(labels = label_currency(prefix = "$")) + #modern label function
+         scale_x_continuous(
+             breaks = seq(2008, 2018, by = 2),  # only show every 2 years
+             limits = c(2008, 2018)) +
+        theme_bw(base_size = 10) +
         labs(
-          title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
+          title = "Weekly Median Price for Center-Based Childcare ($)",
            x = "Study Year",
            y = NULL,
-           color = "Type of Care")
+           color = "California Region") +
+  scale_color_manual(values = mycolors)
 ```
 
--   I can connect a data wrangling pipeline into a `ggplot()` **Lab 4 Question 8 Modified**
+-   I can connect a data wrangling pipeline into a `ggplot()` **Lab 7 Question 3**
 
 ```{r}
 #| label: pe-4-2
 
-
-ca_childcare |> ggplot(mapping = aes(x = mhi_2018, y = mc_infant)) +
-        geom_point() +
-        geom_smooth(method = lm)+
-    scale_y_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
-    scale_x_continuous(labels = scales::dollar_format(prefix = "$", big.mark = ",")) +
-    theme_bw() +
-    labs(
-      title = "Relationship Between CA Income and Price of Center-Based Childcare for Infants",
-      x = "Median Household Income (2018 Dollars)",
-      y = "Median Price of Childcare" )
+fishdata |> 
+  mutate(
+    trip = as.factor(trip),
+    year = as.factor(year)) |> 
+  group_by(trip, year, section) |> 
+    summarize(
+      n_NA = sum(is.na(weight)),
+      .groups = "drop") |> 
+ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = n_NA), 
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, 
+            size = 3) +
+  facet_wrap(~trip) +
+  theme_bw() + 
+  theme(
+    plot.title = element_text(face = "bold", size = 13)) +
+  scale_fill_manual(values = mycolors,
+                     labels = c("Jonsrud",
+                                "Scotty Brown")) +
+  labs(
+    title = "Missing Data Between Survey Trips",
+    x = "Year",
+    y = "Number of Missing Values",
+   fill = "River Section")
 ```
 
-## Data Simulation & Statisical Models
+## Data Simulation & Statisticalac Models
 
 **DSSM-1: I can simulate data from a *variety* of probability models.**
 
--   Example 1
+-   Example 1 **Lab 10 Question 4**
 
 ```{r}
 #| label: dsm-1-1
 
+randomBabies <- function(n_babies){
+  
+  baby <- tibble(correct_parent = 1:n_babies,
+                 new_parent = sample(1:n_babies,
+                                     size = n_babies,
+                                     replace = FALSE))
+  correct_pairs <- baby |>
+    filter(correct_parent == new_parent) |> 
+    nrow()
+  
+  correct_pairs
+  
+}
 ```
 
--   Example 2
+-   Example 2 **Lab 10 Question 4**
 
 ```{r}
 #| label: dsm-1-2
 
+set.seed(525600)
+
+# define slope and intercept parameters
+intercept = 2
+slope = 1
+
+# generate x vector
+x = runif(n = 100,
+      min= 0,
+      max = 1)
+
+# generate noise `ep` vector
+ep = rnorm(n = 100,
+      mean = 0,
+      sd = 1)
+
+# generate outcome from population model
+y = intercept + x*slope + ep
+
+
+# create an "observed data" dataframe with only the x and y vectors
+obs_data <- tibble(y,
+                   x)
 ```
 
 **DSSM-2: I can conduct common statistical analyses in R.**
 
--   Example 1 **Lab 2 Question 17**
+-   Example 1 **Lab 10 Question 7**
 
 ```{r}
 #| label: dsm-2-1
 
-aov(weight ~ species, data = surveys)
+mod <- lm(y ~ x, data = obs_data)
 ```
 
--   Example 2
+-   Example 2 **Lab 3 Question 3**
 
 ```{r}
 #| label: dsm-2-2
 
+chisq.test(teacher_evals_compare$SET_level, teacher_evals_compare$sen_level)
 ```
 
--   Example 3
+-   Example 3 **Lab 2 Question 17**
 
 ```{r}
 #| label: dsm-2-3
 
+aov(weight ~ species, data = surveys)
 ```
 
 ## Revising My Thinking
