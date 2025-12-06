@@ -136,10 +136,10 @@ median_inc_change <- ca_childcare |>
                values_from = mhi_2018) |> 
   group_by(census_region) |> 
   summarize(
-    median_2018 = median(`2018`),
-    median_2008 = median(`2008`),
+    median_inc_2018 = median(`2018`),
+    median_inc_2008 = median(`2008`),
     .groups = "drop" ) |> 
-  arrange(desc(median_2018))
+  arrange(desc(median_inc_2018))
 
 ```
 
@@ -189,7 +189,7 @@ witness2 <- detective |>
              pattern = "(A|a)nnabel") & address_street_name == "Franklin Ave"))
 ```
 
--   Date (example must use functions from **lubridate**): **Modified from Lab 5 Identify Suspects - Revised**
+-   Date (example must use functions from **lubridate**): **Lab 5 Identify Suspects - Revised**
 
 ```{r}
 #| label: wd-3-date
@@ -367,7 +367,7 @@ detective <- get_fit_now_check_in |>
 
 ```
 
--   `inner_join()` Example 2 **Lab 4 Question 2**
+-   `inner_join()` Example 2 **Lab 4 Question 2 - Modified**
 
 ```{r}
 #| label: wd-5-inner-ex-2
@@ -385,25 +385,47 @@ ca_childcare <- counties |>
 
 ```{r}
 #| label: wd-6-semi
+#Revision: create a data frame containing the witnesses and filter the interview set by that dataframe to find their interviews
+
+witnesses <- person |> 
+  filter(address_street_name == "Northwestern Dr" & 
+          address_number == max(address_number[address_street_name == "Northwestern Dr"]) | 
+           str_detect(name,
+                      pattern = "(A|a)nnabel") & address_street_name == "Franklin Ave")
 
 interview |> 
   semi_join(witnesses,
             by = join_by(person_id == id))
 ```
 
--   `anti_join()`
+-   `anti_join()` **Lab 5 Witness Interview - Modified**
 
 ```{r}
 #| label: wd-6-anti
+#create a dataframe with all the people who are NOT witnesses and then filter anti join to leave only the rows that don't match (the witnesses)
+
+notwitnesses <- person |> 
+  filter(!(address_street_name == "Northwestern Dr" & 
+          address_number == max(address_number[address_street_name == "Northwestern Dr"]) | 
+           str_detect(name,
+                      pattern = "(A|a)nnabel") & address_street_name == "Franklin Ave"))
+
+interview |> 
+  anti_join(notwitnesses,
+            by = join_by(person_id == id))
 
 ```
 
 **WD-7: I can pivot dataframes from long to wide and visa versa**
 
--   `pivot_longer()` **Lab 4 Question 7**
+-   `pivot_longer()` **Lab 4 Question 7 - Revised**
 
 ```{r}
 #| label: wd-7-long
+
+#Feedback: Can you reorder the colors in the legend so they appear in the same order as the lines in the plot? I am specifically looking for a tool that does the reordering for you since doing the reordering by hand is not a robust programming practice!
+
+#this is the data preparation for a plot recreation
 
 recreate_plot <- ca_childcare |> 
   select(county_name, 
@@ -430,6 +452,9 @@ recreate_plot <- ca_childcare |>
 ```{r}
 #| label: wd-7-wide
 
+#Feedback: Amazing column names!!!!
+#I would recommend using the %in% operator instead of the or!
+
 median_inc_change <- ca_childcare |> 
   select(county_name, 
          study_year, 
@@ -446,17 +471,17 @@ median_inc_change <- ca_childcare |>
   arrange(desc(median_inc_2018))
 ```
 
-## Reproducibility - will fill in with more assignments because already submitted revisions
+## Reproducibility
 
 **R-1: I can create professional looking, reproducible analyses using RStudio projects, Quarto documents, and the here package.**
 
 The following assignments satisfy the above criteria:
 
--   Lab 5: Murder in SQL City
 -   Lab 7: Functions + Fish
 -   Challenge 7: Incorporating Multiple Inputs
 -   Lab 8: Data Frame Functions
 -   Lab 9: Searching for Efficiency & Making Great Tables
+-   Lab 10: Simulation Exploration
 
 **R-2: I can write well documented and tidy code.**
 
@@ -464,6 +489,7 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: r-2-1
+#Success Feedback: Incredible work! Nice job matching the colors, the percentage labels, and the legend position!
 
 ggplot(data = teacher_evals_compare, 
       mapping = aes(x = sen_level, 
@@ -488,6 +514,8 @@ ggplot(data = teacher_evals_compare,
 
 ```{r}
 #| label: r-2-2
+#Feedback:Amazing column names!!!!
+#I would recommend using the %in% operator instead of the or!
 
 median_inc_change <- ca_childcare |> 
   select(county_name, 
@@ -526,6 +554,10 @@ rescale_01 <- function(x){
 
 ```{r}
 #| label: r-3-example
+
+#Feedback: It looks like you are doing the same process for all your labels! Maybe you could write a helper function?!
+
+#Nice work incorporating function checks for what inputs your function expects!
 
 make_title <- function(var){ #helper function!
   str_to_title(
@@ -592,7 +624,11 @@ restrict <- function(x, min, max) {
 
 ```{r}
 #| label: dvs-1-num
+#Feedback: Arranged confidence intervals! Nice work!
 
+#Red and green are hard for some people’s eyes to differentiate! Can you modify your colors to be more acccesible for everyone’s eyes?
+
+#revised: changed to red and blue
 ci_dat |> 
   arrange(estimate) |> 
   mutate(
@@ -600,7 +636,7 @@ ci_dat |>
   ) |> 
   ggplot(mapping = aes(y = c(1:1000), xmin = conf.low, xmax = conf.high, color = cover)) +
   geom_errorbar() + 
-  scale_color_manual(values = RColorBrewer::brewer.pal(9, "Set1")[c(1,3)],
+  scale_color_manual(values = RColorBrewer::brewer.pal(9, "Set1")[c(1,2)],
                      labels = c("No",
                                 "Yes")) +
   scale_y_continuous(labels = NULL) +
@@ -621,25 +657,27 @@ ci_dat |>
 
 ```{r}
 #| label: dvs-2-num-cat
+#Feedback: I would still recommend recoding the trip variable before plotting, so the facets have more informative names like "Trip 1" instead of "1". You have a variety of tools you’ve learned that would be a good fit for this task -- if_else() or fct_recode() would be great places to start!
+
+#How could you use yout plot title to convey additional information regarding the context of these data?
 
 mycolors <- RColorBrewer::brewer.pal(12, "Paired")[c(7,12)] # color palette
 
 fishdata |> 
   mutate(
-    trip = as.factor(trip),
+    trip = as.factor(if_else(trip == 1,"Trip 1", "Trip 2")),
     year = as.factor(year)) |> 
   group_by(trip, year, section) |> 
     summarize(
       n_NA = sum(is.na(weight)),
       .groups = "drop") |> 
-  
 ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
   geom_col(position = "dodge") +
   geom_text(aes(label = n_NA), 
             position = position_dodge(width = 0.9),
             vjust = -0.5, 
             size = 3) +
-  facet_wrap(~trip) +
+  facet_wrap(~trip, ) +
   theme_bw() + 
   theme(
     plot.title = element_text(face = "bold", size = 13)) +
@@ -647,7 +685,8 @@ ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
                      labels = c("Jonsrud",
                                 "Scotty Brown")) +
   labs(
-    title = "Missing Data Between Survey Trips",
+    title = "Missing Data Between Survey Trips 1989-1991",
+    subtitle = "from Blackfoot River, Helena, Montana",
     x = "Year",
     y = "Number of Missing Values",
    fill = "River Section")
@@ -717,25 +756,27 @@ ggplot(mapping = aes(x = year, y = mean_condition, color = species)) +
 
 ```{r}
 #| label: dvs-2-ex-1
+#Feedback: I would still recommend recoding the trip variable before plotting, so the facets have more informative names like "Trip 1" instead of "1". You have a variety of tools you’ve learned that would be a good fit for this task -- if_else() or fct_recode() would be great places to start!
+
+#How could you use yout plot title to convey additional information regarding the context of these data?
 
 mycolors <- RColorBrewer::brewer.pal(12, "Paired")[c(7,12)] # color palette
 
 fishdata |> 
   mutate(
-    trip = as.factor(trip),
+    trip = as.factor(if_else(trip == 1,"Trip 1", "Trip 2")),
     year = as.factor(year)) |> 
   group_by(trip, year, section) |> 
     summarize(
       n_NA = sum(is.na(weight)),
       .groups = "drop") |> 
-  
 ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
   geom_col(position = "dodge") +
   geom_text(aes(label = n_NA), 
             position = position_dodge(width = 0.9),
             vjust = -0.5, 
             size = 3) +
-  facet_wrap(~trip) +
+  facet_wrap(~trip, ) +
   theme_bw() + 
   theme(
     plot.title = element_text(face = "bold", size = 13)) +
@@ -743,11 +784,11 @@ ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
                      labels = c("Jonsrud",
                                 "Scotty Brown")) +
   labs(
-    title = "Missing Data Between Survey Trips",
+    title = "Missing Data Between Survey Trips 1989-1991",
+    subtitle = "from Blackfoot River, Helena, Montana",
     x = "Year",
     y = "Number of Missing Values",
    fill = "River Section")
-  
 ```
 
 -   I can modify my colors to be accessible to anyone's eyes **Lab 4 Question 7**
@@ -788,7 +829,8 @@ ggplot(data = my_research_long,
         scale_y_continuous(labels = label_currency(prefix = "$")) +
         scale_x_continuous(
              breaks = seq(2008, 2018, by = 2)) + # only show every 2 years
-        theme_bw(base_size = 12) +
+       theme_bw(base_size = 12) +
+        theme(aspect.ratio = 1.25) +
         labs(
           title = "Weekly Median Price for Toddler Childcare for Regions in California ($)",
            x = "Study Year",
@@ -796,10 +838,12 @@ ggplot(data = my_research_long,
            color = "Type of Care")
 ```
 
--   I can modify the text in my plot to be more readable **Lab 10 Question 3**
+-   I can modify the text in my plot to be more readable **Lab 10 Question 3 - Revised**
 
 ```{r}
 #| label: dvs-2-ex-4
+#Feedback: What are the sample sizes of these simulations? That information should be included in the plot title!
+
 # change y axis labels to percentages and add the exact percentages on top of the bars
 
 results |> 
@@ -825,7 +869,7 @@ ggplot(mapping = aes(x = value, y = n, fill = value)) +
     legend.position = "none") +
   labs(
     title = "How Often Babies are Correctly Paired at the Nightmare Hospital",
-    subtitle = "Percent Correct",
+    subtitle = "Percent Correct of 10,000 Simulations of 4 Babies Born a Night",
     x = "# of Correct Pairs",
     y = NULL,
     fill = NULL) +
@@ -878,8 +922,7 @@ ggplot(data = recreate_plot,
              breaks = seq(2008, 2018, by = 2),  # only show every 2 years
              limits = c(2008, 2018)) +
         theme_bw(base_size = 10) +
-        theme(aspect.ratio = 1.25, 
-              axis.text.x = element_text(angle = 30)) +
+        theme(aspect.ratio = 1.25) +
         labs(
           title = "Weekly Median Price for Center-Based Childcare ($)",
            x = "Study Year",
@@ -907,7 +950,7 @@ ggplot(data = surveys,
                   median.color= "black",
                   median.linewidth = 0.75, 
                   box.linewidth= 0.25) +
-        theme_bw(base_size = 14, base_family = "times new roman") +
+        theme_bw(base_size = 12, base_family = "times new roman") +
    theme(axis.text.x = element_text(angle = 30),
          panel.border = element_rect(colour = "darkgreen", linewidth=2)) +
         labs(
@@ -997,7 +1040,7 @@ ci_dat |>
   ) |> 
   ggplot(mapping = aes(y = c(1:1000), xmin = conf.low, xmax = conf.high, color = cover)) +
   geom_errorbar() + 
-  scale_color_manual(values = RColorBrewer::brewer.pal(9, "Set1")[c(1,3)],
+  scale_color_manual(values = RColorBrewer::brewer.pal(9, "Set1")[c(1,2)],
                      labels = c("No",
                                 "Yes")) +
   scale_y_continuous(labels = NULL) +
@@ -1019,6 +1062,8 @@ ci_dat |>
 
 ```{r}
 #| label: dvs-4-summarize
+#Feedback: Could your output be more concise? Could your output be only the information necessary to answer the question?
+#Can you get both of these summary statistics in **one** pipeline? You will want to use the summarize() function!
 
 teacher_evals_clean |>
   summarize(
@@ -1261,7 +1306,7 @@ detective |>
 #| label: pe-1-across
 
 teacher_evals_clean |>
-  filter(if_any(
+  filter(if_any( #if any is an across
     .cols = everything(), 
     .fns = ~ is.na(.x)))
 ```
@@ -1284,7 +1329,10 @@ evals <- evals |>
 
 ```{r}
 #| label: pe-2-1
+# Feedback: t looks like you are checking multiple condtions in your if_else() function. This is exactly what the case_when() function is built for!
 
+#Where are your function checks? What types of inputs does your function expect?
+  
 restrict <- function(x, min, max) {
   stopifnot("Input 'x' must be a numeric value." = is.numeric(x))
   if (length(x) < 1) stop("Input vector must have length >= 1!")
@@ -1299,6 +1347,7 @@ restrict <- function(x, min, max) {
 
 ```{r}
 #| label: pe-2-2
+# Sucess Feedback: Nice use of the modern syntax for across()!
 
 rescale_column <- function(df, cols){
   df |> 
@@ -1325,12 +1374,20 @@ rescale_01 <- function(x){
 
 **PE-3: I can use iteration to reduce repetition in my code.**
 
--   using `across()` **Lab 7 Question 1**
+-   using `across()` **Lab 8 Question 1**
 
 ```{r}
 #| label: pe-3-across
 
 
+rescale_column <- function(df, cols){
+  df |> 
+   mutate(
+       across(.cols = {{cols}},
+              .fns = ~ rescale_01(.x)
+              )
+       )
+}
 ```
 
 -   using a `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.) **Lab 9 Question 2**
@@ -1354,11 +1411,16 @@ surveys |>
   kable_classic(full_width = F, html_font = "Cambria")
 ```
 
--   using a `map()` function with one input
+-   using a `map()` function with one input **Lab 9 Question 4**
 
 ```{r}
 #| label: pe-3-map-2
 
+evals <- evals |> 
+  map_if(.x = evals,
+         .p = is.character,
+         .f = ~ as.factor(.x)) |> 
+  bind_cols()
 
 ```
 
@@ -1368,6 +1430,8 @@ surveys |>
 
 ```{r}
 #| label: pe-4-1
+
+#label_currency is a modern function that was the new verson of dollar_format
 
 ggplot(data = recreate_plot, 
         mapping = aes(x = study_year, y = price, color = census_region)) +
@@ -1391,10 +1455,17 @@ ggplot(data = recreate_plot,
 
 ```{r}
 #| label: pe-4-2
+#Feedback: I would still recommend recoding the trip variable before plotting, so the facets have more informative names like "Trip 1" instead of "1". You have a variety of tools you’ve learned that would be a good fit for this task -- if_else() or fct_recode() would be great places to start!
+
+#How could you use yout plot title to convey additional information regarding the context of these data?
+
+#also using the native pipe operator (modern tool)
+
+mycolors <- RColorBrewer::brewer.pal(12, "Paired")[c(7,12)] # color palette
 
 fishdata |> 
   mutate(
-    trip = as.factor(trip),
+    trip = as.factor(if_else(trip == 1,"Trip 1", "Trip 2")),
     year = as.factor(year)) |> 
   group_by(trip, year, section) |> 
     summarize(
@@ -1406,7 +1477,7 @@ ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
             position = position_dodge(width = 0.9),
             vjust = -0.5, 
             size = 3) +
-  facet_wrap(~trip) +
+  facet_wrap(~trip, ) +
   theme_bw() + 
   theme(
     plot.title = element_text(face = "bold", size = 13)) +
@@ -1414,13 +1485,14 @@ ggplot(mapping = aes(x = year, y = n_NA, fill = section)) +
                      labels = c("Jonsrud",
                                 "Scotty Brown")) +
   labs(
-    title = "Missing Data Between Survey Trips",
+    title = "Missing Data Between Survey Trips 1989-1991",
+    subtitle = "from Blackfoot River, Helena, Montana",
     x = "Year",
     y = "Number of Missing Values",
    fill = "River Section")
 ```
 
-## Data Simulation & Statisticalac Models
+## Data Simulation & Statistical Models
 
 **DSSM-1: I can simulate data from a *variety* of probability models.**
 
@@ -1489,7 +1561,8 @@ mod <- lm(y ~ x, data = obs_data)
 ```{r}
 #| label: dsm-2-2
 
-chisq.test(teacher_evals_compare$SET_level, teacher_evals_compare$sen_level)
+chisq.test(teacher_evals_compare$SET_level,
+           teacher_evals_compare$sen_level)
 ```
 
 -   Example 3 **Lab 2 Question 17**
@@ -1502,34 +1575,30 @@ aov(weight ~ species, data = surveys)
 
 ## Revising My Thinking
 
-<!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
-
-I've definitely learned that there is often an easier way to certain perform tasks when I am aware of the correct functions. This takes practice, but I think I am growing in recognizing shortcuts better to have more efficient code. I revised my thinking my starting from square 1 on many problems, and envisioning the different ways to attack a problem. I use feedback from every assignment to submit thoughtful revisions for every single assignment when available. I do my best to implement what I have learned from revisions into my future work.
-
-<!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
+I quickly realized after receiving feedback on the first few assignments that there are often more efficient ways to perform tasks than my first idea. It took effort to learn new functions and troubleshoot, but throughout the course I have worked hard to recognize the errors in my own thinking and revise them. I often started from "square 1," brainstorming all the different ways to approach a problem and implementing the most efficient one. I used feedback from every assignment to submit thoughtful revisions for my growing areas, and I did my best to implement what I learned from revisions into my future work. In my portfolio, I revised earlier assignments based not only on feedback from back then, but the skills I have acquired now. For example, DEVS-2 example 2 uses my recent understanding of unique color palettes applied to a graph from earlier in the course.
 
 ## Extending My Thinking
 
-<!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
-
-I have extended my thinking by constantly searching through resources and Stack Overflow for more efficient solutions to problems. I like to be creative with my plots, so I tried my best to customize as much as possible using outside research and the tools at my disposal. I think I went above and beyond when it came to open-ended analysis because this is the kind of work that I want to be doing in the future. I am really trying to hone these skills so I can be prepared and make clear visualizations and reports.
+I have learned to love Stack Overflow and reading code documentation to implement creative solutions and visualizations into my code. In addition to the resources in the course materials, I constantly used outside research to supplement the tools I was using. I feel that all of my Lab 10: Simulation Exploration work showed my desire to extend my understanding of the functions that we were only required to be using at their basic level. This hard work comes from the fact that the career I want is reliant on these data manipulation skills, so I have made the extra effort to truly understand their complexities.
 
 ## Peer Support & Collaboration
 
-<!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
+**Feedback Example:**
 
-My feedback:
+**"First of all, I love the theme of your output! The white font is a little small and hard to read on the background but still super cute!"**
 
-"First of all, I love the theme of your output! The white font is a little small and hard to read on the background but still super cute!"
+I am proud of this feedback where I praised a student for customozing their Quarto theme. I think it is extremely important to lift people up for going the extra mile creatively. As a creative person, I feel that it is sometimes difficult in this area of study to find expressive outlets in assignments, so I wanted the student to know that their extra effort was impactful.
 
-"Make sure when you load in your data and libraries that you put {r, message=FALSE} in each code chunk to silence the messages. It took me forever to figure out where to put it, but it helps readability!"
+**Feedback Example:**
 
-I think it is really important to lift people up for going the extra mile for creativity. I also makes me feel really good in a peer review when I know that I am struggling through concepts alongside my fellow students. That makes the advice even more valuable. It took me a long time to consistently have professional report skills, so I wanted to share that knowledge.
+**"Make sure when you load in your data and libraries that you put {r, message=FALSE} in each code chunk to silence the messages. It took me forever to figure out where to put it, but it helps with readability!"**
 
-<!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
+I am also proud of my feedback when I gave a student a tip about silencing messages because I let them know that I was also struggling alongside them, which always makes me feel better when I receive a peer review. These reviews are about building off of each others skills, helping each other stay consistent, and sharing knowledge rather than comparing yourself to your classmates.
 
-It was difficult to be the "computer" role during collaboration because I wanted to give the answer to the problem immediately when I identify it. However, I think that I learn best when challenged in the role of the coder, so I do my best to honor that experience for others. Having mutual respect for the process of trial and error with another partner has really garnered a positive space to grow. I think I am doing a good job at asking questions and helping others to find solutions on their own!
+In addition to these specific examples, I consistently gave my peers feedback on code tidiness and efficiency, letting them know where they were missing spaces, indentation, or named arguments.
+
+I initially struggled in the "computer" role during collaboration because I wanted to answer the problem as soon as I knew the method to do it. However, I understood that it was important to honor the learning experience for my partner in the "coder" role. I thought of how I would want to be challenged if I was the "coder." I asked questions that lead them to think about the pathway to the solution, rather than just giving the answer myself. Having mutual respect for the learning process of another student allowed me to grow as a collaborator and coder when I was in that role. I think I did a good job communicating with other students and often made new friends!
 
 ## Grade Reasoning
 
-I believe that I deserve an A- on this midterm portfolio because I have fine-tuned each code chunk to achieve the goal of the learning target. I have also updates code chunks from past assignments to include shortcuts and modern tools that I would not have known at the time such as the %in% operator. I take extra time to show my creativity, ask questions to better my understanding, and effectively implement new skills as a I learn them. For these reasons, I believe that an A- is the proper grade for this midterm portfolio, as I am not perfect, but getting very close to consistently efficient and tidy code!
+I believe that I deserve an A on this portfolio because I have displayed my skills to achieve the learning target in each code chunk. I have also updated code chunks with feedback from past assignments to include shortcuts and modern tools that I would not have known at that time such as the %in% operator. I take extra time to show my creativity, ask questions to better my understanding, and effectively implement new skills as a I learn them. For these reasons, I believe that an A is the proper grade for this midterm portfolio, recognizing that although my code is not perfect every time, I am an efficient, tidy, and creative coder who makes an extra effort to revise my assignments, push my limits, and learn through collaboration.
