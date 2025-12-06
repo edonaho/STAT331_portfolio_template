@@ -15,9 +15,7 @@ execute:
   warnings: false
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_A\_.
-
-[**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A.
 
 ## Working with Data
 
@@ -1601,4 +1599,4 @@ I initially struggled in the "computer" role during collaboration because I want
 
 ## Grade Reasoning
 
-I believe that I deserve an A on this portfolio because I have displayed my skills to achieve the learning target in each code chunk. I have also updated code chunks with feedback from past assignments to include shortcuts and modern tools that I would not have known at that time such as the %in% operator. I take extra time to show my creativity, ask questions to better my understanding, and effectively implement new skills as a I learn them. For these reasons, I believe that an A is the proper grade for this midterm portfolio, recognizing that although my code is not perfect every time, I am an efficient, tidy, and creative coder who makes an extra effort to revise my assignments, push my limits, and learn through collaboration.
+I believe that I deserve an A on this portfolio because I have displayed my skills to achieve the learning target in each code chunk. I have also updated code chunks with feedback from past assignments to include shortcuts and modern tools that I would not have known at that time such as the %in% operator. I take extra time to show my creativity, ask questions to better my understanding, and effectively implement new skills as I learn them. For these reasons, I believe that an A is the proper grade for this midterm portfolio, recognizing that although my code is not perfect every time, I am an efficient, tidy, and creative coder who makes an extra effort to revise my assignments, push my limits, and learn through collaboration.
