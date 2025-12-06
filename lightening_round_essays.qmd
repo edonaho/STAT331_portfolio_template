@@ -1,21 +1,29 @@
 ---
 title: "Lightening Round Essays"
+author: "Elise Donaho"
+theme: minty
 format: html
 editor: visual
 ---
 
 **Answer each of the following questions with *one sentence* including a brief explanation.**
 
-1. Finish the sentence with another student’s name: "If [Name of Student] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
+1.  Finish the sentence with another student’s name: "If \[Name of Student\] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
+    If Connie Xian doesn't earn an A, then nobody should, because she constantly went the extra mile to make code efficient and was always helpful in peer reviewing with me outside of class to find the best solutions.
 
-2. What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
+2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
 
+    I struggled with data wrangling, especially in Lab 3, because I often knew exactly what I wanted to do, but did not know how to use my freshly learned tools to get there considering the nuances of their usage.
 
-3. What was the easiest part of the class for you? Explain why.
+3.  What was the easiest part of the class for you? Explain why.
 
+    The easiest part of this class was creating visualizations because it was easy to see exactly how code inputs were working, and I also enjoyed being creative with plots.
 
-4. What part of the class surprised or interested you the most? Explain why.
+4.  What part of the class surprised or interested you the most? Explain why.
 
+    I was very interested in viewing other classmates' code during peer reviews because it showed me that there are multiple ways to reach the same goal, which is both informative and frustrating.
 
-5. Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+5.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+
+    I recommend becoming familiar with how code documentation is formatted because it makes it much easier to know which arguments a function requires and examples of how they are used.
