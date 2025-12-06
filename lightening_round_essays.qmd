@@ -24,4 +24,4 @@ editor: visual
 
 5.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
 
-    I recommend becoming familiar with how code documentation is formatted because it makes it much easier to know which arguments a function requires and examples of how they are used.
+    I would recommend becoming familiar with how code documentation is formatted because it makes it much easier to know which arguments a function requires and examples of how they are used.
